@@ -61,7 +61,6 @@ def get_train_details(train_number : str) -> str:
         - If the user asks for the general route, simmarize the origin, destinaton, and a few major stops rather than listing all 40+ stations.
     """
 
-    print(f"DEBUG: Tool triggered by agent with train number: {train_number}")
 
     try:
         url = f"https://indian-railway-irctc.p.rapidapi.com/api/trains-search/v1/train/{train_number}"
@@ -110,19 +109,55 @@ message = [
 ]
 
 if __name__ == "__main__":
-    for chunk in agent.stream(
-            input={
-                "message" : message,
-            } ,
-            stream_mode="values"
-    ):
-        latest_message = chunk["messages"][-1]
-        if latest_message.content:
-            if isinstance(latest_message, HumanMessage):
-                print(f"User: {latest_message.content}")
-            elif isinstance(latest_message, ToolMessage) and agent_debug:
-                print(f"Tool: {latest_message.content}")
-            elif isinstance(latest_message, AIMessage):
-                print(f"Agent: {latest_message.content}")
-        elif latest_message.tool_calls:
-            print(f"Calling tools: {[tc['name'] for tc in latest_message.tool_calls]}")
+
+    options = 5
+    while options  != 3:
+        print("Enter 1 for chat")
+        print("Enter 2 for follow up")
+        print("Enter 3 for exit")
+        options = int(input("Enter the number for continuing"))
+
+        if options == 1:
+            question = str(input("Enter the train related question with train number"))
+            message[0]["content"] = question
+
+            for chunk in agent.stream(
+                    input={
+                        "message": message,
+                    },
+                    stream_mode="values"
+            ):
+                latest_message = chunk["messages"][-1]
+                if latest_message.content:
+                    if isinstance(latest_message, HumanMessage):
+                        print(f"User: {latest_message.content}")
+                    elif isinstance(latest_message, ToolMessage) and agent_debug:
+                        print(f"Tool: {latest_message.content}")
+                    elif isinstance(latest_message, AIMessage):
+                        print(f"Agent: {latest_message.content}")
+                elif latest_message.tool_calls:
+                    print(f"Calling tools: {[tc['name'] for tc in latest_message.tool_calls]}")
+
+        if options == 2:
+            follow_up_question = str(input("Copy paste follow up question"))
+            message[0]["content"] = follow_up_question
+
+            for chunk in agent.stream(
+                    input={
+                        "message": message,
+                    },
+                    stream_mode="values"
+            ):
+                latest_message = chunk["messages"][-1]
+                if latest_message.content:
+                    if isinstance(latest_message, HumanMessage):
+                        print(f"User: {latest_message.content}")
+                    elif isinstance(latest_message, ToolMessage) and agent_debug:
+                        print(f"Tool: {latest_message.content}")
+                    elif isinstance(latest_message, AIMessage):
+                        print(f"Agent: {latest_message.content}")
+                elif latest_message.tool_calls:
+                    print(f"Calling tools: {[tc['name'] for tc in latest_message.tool_calls]}")
+
+
+    print("Thank you for choosing this agent")
